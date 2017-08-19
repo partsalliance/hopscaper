@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func get_html_links() {
+func get_html_links() []string {
 	url := "http://beersmith.com/hop-list/"
 	response, _ := http.Get(url)
 	hop_name_list := []string{}
@@ -18,7 +18,7 @@ func get_html_links() {
 		case tt == html.ErrorToken:
 			response.Body.Close()
 			fmt.Println("finished")
-			return
+			break
 
 		case tt == html.StartTagToken:
 			t := z.Token()
@@ -28,14 +28,16 @@ func get_html_links() {
 				if inner == html.TextToken {
 					text := (string)(z.Text())
 					t := strings.TrimSpace(text)
-					fmt.Println(t)
+					if t != "" {
+						hop_name_list = append(hop_name_list, t)
+					}
+
 				} else if inner == html.StartTagToken {
 					for _, a := range z.Token().Attr {
 						if a.Key == "href" {
 							if strings.Contains(a.Val, "hops/") {
 								inner := z.Next()
 								if inner == html.TextToken {
-									fmt.Println(z.Token().Data)
 									hop_name_list = append(hop_name_list, z.Token().Data)
 								}
 							}
@@ -46,11 +48,28 @@ func get_html_links() {
 			}
 		}
 	}
+	return hop_name_list
 }
 
 func main() {
 	fmt.Println("start")
 	//get_hop_data("http://www.beersmith.com/hops/zeus.htm")
-	get_html_links()
+	hops := get_html_links()
+
+	var divided [][]string
+
+	chunkSize := 4
+	for i := 0; i < len(hops); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(hops) {
+			end = len(hops)
+		}
+
+		divided = append(divided, hops[i:end])
+	}
+
+	fmt.Printf("%#v\n", divided)
+
 
 }
