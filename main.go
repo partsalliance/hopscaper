@@ -53,13 +53,13 @@ func get_html_links() []string {
 
 func main() {
 	fmt.Println("start")
-	//get_hop_data("http://www.beersmith.com/hops/zeus.htm")
 	hops := get_html_links()
 
 	var divided [][]string
 
 	chunkSize := 4
 	for i := 0; i < len(hops); i += chunkSize {
+
 		end := i + chunkSize
 
 		if end > len(hops) {
@@ -69,7 +69,9 @@ func main() {
 		divided = append(divided, hops[i:end])
 	}
 
-	fmt.Printf("%#v\n", divided)
+	for _, hop := range divided {
+		fmt.Println(hop)
+	}
 
 
 }
