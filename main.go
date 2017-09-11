@@ -5,6 +5,9 @@ import (
 	"golang.org/x/net/html"
 	"net/http"
 	"strings"
+	"log"
+	"os"
+	"encoding/csv"
 )
 
 func get_html_links() []string {
@@ -51,6 +54,12 @@ func get_html_links() []string {
 	return hop_name_list
 }
 
+func checkError(message string, err error) {
+	if err != nil {
+		log.Fatal(message, err)
+	}
+}
+
 func main() {
 	fmt.Println("start")
 	hops := get_html_links()
@@ -69,8 +78,16 @@ func main() {
 		divided = append(divided, hops[i:end])
 	}
 
+	file, err := os.Create("result.csv")
+	checkError("Cannot create file", err)
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
 	for _, hop := range divided {
-		fmt.Println(hop)
+		err := writer.Write(hop)
+		checkError("Cannot write to file", err)
 	}
 
 }
